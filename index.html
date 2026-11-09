@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HOONSTORE</title>
+<meta name="description" content="junghoon1118이 만든 웹앱을 모아 둔 스토어. 설치비 없이 홈 화면에 추가해서 앱처럼 쓰세요.">
+<meta name="theme-color" content="#14161b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HOONSTORE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 레이아웃: 위에 스토어 간판(로고+검색), 그 아래 '오늘의 앱' 진열대, 카테고리, 앱 목록. 상세 화면은 같은 틀에서 해시(#app-아이디)로 바꿔 보여 준다. */
+:root{
+  --bg:#f2f3f5; --surface:#ffffff; --surface-2:#e8eaee; --ink:#14161b; --ink-2:#474c57; --ink-3:#757b87; --line:#d8dbe1;
+  --accent:#2b4fd8; --accent-ink:#ffffff; --marker:#ffd43b; --ok:#1f7a4d; --warn:#9a5b00;
+  --f-display:"Black Han Sans","IBM Plex Sans KR",sans-serif;
+  --f-ui:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --r:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1014; --surface:#171a20; --surface-2:#21252d; --ink:#eef0f4; --ink-2:#b6bbc5; --ink-3:#8b919d; --line:#2b3039;
+  --accent:#7590ff; --accent-ink:#0e1014; --marker:#e8c12d; --ok:#5cc28f; --warn:#e3a64a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1014; --surface:#171a20; --surface-2:#21252d; --ink:#eef0f4; --ink-2:#b6bbc5; --ink-3:#8b919d; --line:#2b3039;
+  --accent:#7590ff; --accent-ink:#0e1014; --marker:#e8c12d; --ok:#5cc28f; --warn:#e3a64a; color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6}
+img{max-width:100%;display:block}
+[hidden]{display:none!important}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* 간판 */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:14px;padding-block:12px}
+.logo{display:flex;align-items:baseline;gap:2px;text-decoration:none;flex:none}
+.logo b{font-family:var(--f-display);font-weight:400;font-size:26px;letter-spacing:.01em;line-height:1;background:linear-gradient(transparent 62%,var(--marker) 62% 92%,transparent 92%);padding:0 2px}
+.logo span{font-weight:700;font-size:14px;letter-spacing:.22em;color:var(--ink-2);margin-left:4px}
+.search{flex:1;min-width:0;position:relative;max-width:420px;margin-left:auto}
+.search input{width:100%;font:inherit;font-size:14px;padding:9px 12px 9px 36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.small{padding:6px 14px;font-size:13px}
+
+main{padding-block:22px 48px}
+.sec{margin-top:34px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
+.sec-h h2{font-size:19px;margin:0;letter-spacing:-.01em}
+.sec-h small{color:var(--ink-3);font-size:13px}
+
+/* 오늘의 앱 */
+.feature{position:relative;overflow:hidden;border-radius:22px;background:var(--app,#2e4a3b);color:#f4f2ea;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);min-height:340px}
+.feature .txt{padding:30px 32px;display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:0}
+.eyebrow{font-size:12px;letter-spacing:.18em;font-weight:600;opacity:.8;margin:0}
+.feature h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.12;margin:0;text-wrap:balance}
+.feature p.tag{margin:0;font-size:16px;opacity:.92;max-width:34ch}
+.feature .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.feature .btn{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff}
+.feature .btn.primary{background:#f4f2ea;color:#1c2a22;border-color:#f4f2ea}
+.feature .shots{position:relative;min-width:0}
+.phone{position:absolute;width:200px;aspect-ratio:375/812;border-radius:26px;overflow:hidden;border:6px solid #11161a;box-shadow:0 20px 40px rgba(0,0,0,.35);background:#11161a}
+.phone img{width:100%;height:100%;object-fit:cover;object-position:top}
+.phone.p1{right:150px;top:40px;transform:rotate(-6deg)}
+.phone.p2{right:20px;top:18px;transform:rotate(4deg)}
+.chalk{position:absolute;left:32px;bottom:18px;font-size:12px;opacity:.65}
+
+/* 카테고리 */
+.cats{display:flex;gap:8px;flex-wrap:wrap}
+.cat{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:14px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.cat em{font-style:normal;color:var(--ink-3);font-size:12px;font-variant-numeric:tabular-nums}
+.cat[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cat[aria-pressed="true"] em{color:inherit;opacity:.7}
+
+/* 앱 목록 */
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;text-decoration:none}
+.row:hover{border-color:var(--ink-3)}
+.ico{width:64px;height:64px;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.row h3{margin:0;font-size:16px;line-height:1.35}
+.row p{margin:2px 0 0;color:var(--ink-3);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{color:var(--ink-3);font-size:12px}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:26px;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+
+/* 설치 방식 안내 */
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;counter-reset:s}
+.how div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 18px}
+.how b{display:block;margin-bottom:4px}
+.how div::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--marker);color:#14161b;font-weight:700;font-size:13px;margin-bottom:8px}
+.how p{margin:0;color:var(--ink-2);font-size:14px}
+
+/* 상세 */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--ink-2);text-decoration:none;font-size:14px;margin-bottom:14px}
+.head{display:grid;grid-template-columns:112px minmax(0,1fr);gap:20px;align-items:center}
+.head .ico{width:112px;height:112px;border-radius:26px}
+.head h1{margin:0;font-size:clamp(24px,4vw,32px);line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+.head .dev{color:var(--accent);font-size:14px;font-weight:600;margin:2px 0 0}
+.head .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:22px;border-block:1px solid var(--line)}
+.facts div{padding:12px 8px;text-align:center;border-right:1px solid var(--line)}
+.facts div:last-child{border-right:0}
+.facts dt{font-size:12px;color:var(--ink-3)}
+.facts dd{margin:2px 0 0;font-weight:700;font-size:14px}
+.shots-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
+.shots-row figure{margin:0;flex:none;width:200px;scroll-snap-align:start}
+.shots-row img{width:200px;aspect-ratio:375/812;object-fit:cover;object-position:top;border-radius:16px;border:1px solid var(--line)}
+.shots-row figcaption{font-size:12px;color:var(--ink-3);margin-top:6px}
+.prose{max-width:68ch}
+.prose p{margin:0 0 10px}
+.feat{list-style:none;padding:0;margin:0;display:grid;gap:8px;max-width:68ch}
+.feat li{display:grid;grid-template-columns:20px 1fr;gap:8px}
+.feat li::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--marker);margin-top:9px;margin-left:4px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;font-size:14px;color:var(--ink-2);max-width:68ch}
+.info{border-collapse:collapse;width:100%;max-width:640px;font-size:14px}
+.info th,.info td{text-align:left;padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.info th{width:120px;color:var(--ink-3);font-weight:500}
+.info td{word-break:break-all}
+
+/* 설치 안내 시트 */
+.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(10,12,16,.5);display:grid;place-items:end center}
+.sheet{width:min(520px,100%);max-height:90vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:20px 20px 0 0;padding:20px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+@media (min-width:700px){.sheet-bg{place-items:center}.sheet{border-radius:20px}}
+.sheet-top{display:flex;gap:12px;align-items:center}
+.sheet-top .ico{width:48px;height:48px;border-radius:12px}
+.sheet-top h2{margin:0;font-size:17px}
+.sheet-top p{margin:0;color:var(--ink-3);font-size:13px}
+.x{margin-left:auto;border:0;background:var(--surface-2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;line-height:1}
+.tabs{display:flex;gap:6px;margin:16px 0 12px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.steps{margin:0;padding-left:22px;display:grid;gap:8px}
+.steps li{padding-left:2px}
+.kbd{display:inline-block;border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:0 6px;font-size:13px;font-weight:600}
+.warnbox{margin-top:12px;background:color-mix(in srgb,var(--marker) 22%,var(--surface));border-radius:10px;padding:10px 12px;font-size:13px}
+.sheet .acts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.sheet .acts .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px}
+
+footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px}
+footer .wrap{padding-block:22px 30px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between}
+footer nav{display:flex;gap:14px;flex-wrap:wrap}
+
+@media (max-width:760px){
+  .feature{grid-template-columns:1fr;min-height:0}
+  .feature .txt{padding:24px 22px 8px}
+  .feature .shots{height:250px}
+  .phone{width:150px}
+  .phone.p1{right:auto;left:22px;top:26px}
+  .phone.p2{right:auto;left:150px;top:14px}
+  .chalk{display:none}
+  .how{grid-template-columns:1fr}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts div:nth-child(2){border-right:0}
+  .facts div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .head{grid-template-columns:84px minmax(0,1fr);gap:14px}
+  .head .ico{width:84px;height:84px;border-radius:20px}
+  .list{grid-template-columns:1fr}
+  .logo span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#" aria-label="HOONSTORE 홈"><b>HOON</b><span>STORE</span></a>
+  <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="앱 검색" aria-label="앱 검색"></label>
+  <button class="btn small" id="installStore" hidden>스토어 설치</button>
+</div></header>
+
+<main class="wrap" id="view"></main>
+
+<footer><div class="wrap">
+  <span>HOONSTORE · junghoon1118이 만든 웹앱을 모아 둔 곳</span>
+  <nav><a href="#privacy">개인정보처리방침</a><a href="https://github.com/junghoon1118" target="_blank" rel="noopener">GitHub</a></nav>
+</div></footer>
+
+<div class="sheet-bg" id="sheetBg" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+/* ───── 앱 목록: 새 앱을 올릴 때 여기에 하나씩 추가한다 ───── */
+const APPS = [
+  {
+    id: "sqld",
+    name: "SQLD 모의 시험장",
+    tagline: "시험장 분위기까지 연습하는 SQL 자격시험 모의고사",
+    category: "교육",
+    url: "https://junghoon1118.github.io/SQLD/",
+    icon: "assets/apps/sqld/icon.png",
+    color: "#2e4a3b",
+    developer: "junghoon1118",
+    updated: "2026.11.09",
+    offline: true,
+    devices: "폰 · 태블릿 · PC",
+    screens: [
+      { src: "assets/apps/sqld/screen-1.jpg", cap: "수험표 확인과 시험 설정" },
+      { src: "assets/apps/sqld/screen-2.jpg", cap: "무작위 좌석에서 바라본 교실과 문제지" },
+      { src: "assets/apps/sqld/screen-3.jpg", cap: "컴퓨터용 사인펜으로 칠하는 OMR 답안지" }
+    ],
+    description: [
+      "시험장에 들어가면 머리가 하얘지는 사람을 위한 모의고사입니다. 학교 교실을 그대로 옮겨 와서, 무작위로 배정된 자리에 앉아 실제 시험처럼 90분을 보내게 합니다.",
+      "감독관이 교실을 돌고, 교내 방송이 시작과 종료를 알리고, 주변에서는 기침 소리와 종이 넘기는 소리가 들립니다. 답은 문제지가 아니라 OMR 답안지에 사인펜으로 칠해야 하고, 고칠 때는 수정테이프를 써야 합니다."
+    ],
+    features: [
+      "1과목 10문항, 2과목 40문항, 총 100점. 과목별 과락까지 판정",
+      "2과목은 SQL 실행 결과와 오류를 찾는 코드 중심 문제",
+      "감독관 순찰, 본인 확인, 교내 방송, 방해 소음 (강도 선택)",
+      "문제지와 OMR 답안지 분리, 중복 표기는 오답, 답안지 교체 요청",
+      "채점 후 문항별 해설과 '문제지 답과 OMR 답이 다른 문항' 확인",
+      "실전 90분 · 단축 30분 · 체험 10분 모드"
+    ],
+    notice: "공식 시험 기관과 관련 없는 비공식 연습 앱입니다. 문제는 모두 자체 제작했습니다. 실제 시험 규정은 데이터자격검정 공식 사이트에서 확인하세요.",
+    privacy: "개인정보를 수집하지 않습니다. 입력한 이름은 시험 화면에만 쓰이고 어디에도 저장하거나 보내지 않습니다."
+  }
+];
+const CATS = ["전체", "교육", "생산성", "도구", "게임"];
+
+/* ───── 공통 ───── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const view = $("#view");
+const state = { cat: "전체", q: "" };
+const ua = navigator.userAgent;
+const isIOS = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(ua);
+const inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\//i.test(ua);
+const myPlatform = isIOS ? "ios" : isAndroid ? "android" : "pc";
+
+let toastT = 0;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
+function copy(text){
+  const done = () => toast("주소를 복사했어요");
+  try { navigator.clipboard.writeText(text).then(done, () => fallback()); } catch(e){ fallback(); }
+  function fallback(){ const i = document.createElement("input"); i.value = text; document.body.appendChild(i); i.select(); try { document.execCommand("copy"); done(); } catch(e){ toast("주소: " + text); } i.remove(); }
+}
+
+/* ───── 홈 ───── */
+function appRow(a){
+  return `<a class="row" href="#app-${a.id}">
+    <img class="ico" src="${a.icon}" alt="" width="64" height="64">
+    <div style="min-width:0"><h3>${esc(a.name)}</h3><p>${esc(a.tagline)}</p><div class="meta">${esc(a.category)} · 무료${a.offline ? " · 오프라인 지원" : ""}</div></div>
+    <span class="btn small primary" data-install="${a.id}">받기</span>
+  </a>`;
+}
+function home(){
+  const f = APPS[0];
+  const q = state.q.trim().toLowerCase();
+  const list = APPS.filter(a => (state.cat === "전체" || a.category === state.cat) &&
+    (!q || (a.name + a.tagline + a.category).toLowerCase().includes(q)));
+  const count = c => c === "전체" ? APPS.length : APPS.filter(a => a.category === c).length;
+  view.innerHTML = `
+    ${q ? "" : `<section class="feature" style="--app:${f.color}" aria-label="오늘의 앱">
+      <div class="txt">
+        <p class="eyebrow">오늘의 앱 · ${esc(f.category)}</p>
+        <h1>${esc(f.name)}</h1>
+        <p class="tag">${esc(f.tagline)}</p>
+        <div class="acts"><button class="btn primary" data-install="${f.id}">설치하기</button><a class="btn" href="#app-${f.id}">자세히 보기</a></div>
+      </div>
+      <div class="shots" aria-hidden="true">
+        <div class="phone p1"><img src="${f.screens[2].src}" alt=""></div>
+        <div class="phone p2"><img src="${f.screens[1].src}" alt=""></div>
+      </div>
+      <span class="chalk">${esc(f.developer)} · 업데이트 ${esc(f.updated)}</span>
+    </section>`}
+    <section class="sec" aria-label="카테고리">
+      <div class="cats">${CATS.map(c => `<button class="cat" data-cat="${c}" aria-pressed="${c === state.cat}">${c} <em>${count(c)}</em></button>`).join("")}</div>
+    </section>
+    <section class="sec">
+      <div class="sec-h"><h2>${q ? `'${esc(state.q)}' 검색 결과` : state.cat === "전체" ? "모든 앱" : esc(state.cat)}</h2><small>${list.length}개</small></div>
+      ${list.length ? `<div class="list">${list.map(appRow).join("")}</div>` :
+        `<div class="empty"><b>${q ? "찾는 앱이 없어요" : "이 카테고리에는 아직 앱이 없어요"}</b>새 앱이 올라오면 여기에 보여요.</div>`}
+    </section>
+    <section class="sec">
+      <div class="sec-h"><h2>HOONSTORE 앱은 이렇게 설치돼요</h2></div>
+      <div class="how">
+        <div><b>받기를 누르면</b><p>내 기기에 맞는 설치 방법이 나와요. 설치비도, 계정도 필요 없어요.</p></div>
+        <div><b>홈 화면에 추가</b><p>브라우저 메뉴에서 '홈 화면에 추가'나 '앱 설치'를 누르면 아이콘이 생겨요.</p></div>
+        <div><b>앱처럼 실행</b><p>주소창 없이 열리고, 오프라인을 지원하는 앱은 인터넷이 끊겨도 열려요.</p></div>
+      </div>
+    </section>`;
+}
+
+/* ───── 상세 ───── */
+function detail(a){
+  view.innerHTML = `
+    <a class="back" href="#">← 스토어로</a>
+    <section class="head">
+      <img class="ico" src="${a.icon}" alt="${esc(a.name)} 아이콘" width="112" height="112">
+      <div style="min-width:0">
+        <h1>${esc(a.name)}</h1>
+        <p class="dev">${esc(a.developer)}</p>
+        <div class="acts"><button class="btn primary" data-install="${a.id}">설치하기</button><a class="btn" href="${a.url}" target="_blank" rel="noopener">바로 열기</a></div>
+      </div>
+    </section>
+    <dl class="facts">
+      <div><dt>가격</dt><dd>무료</dd></div>
+      <div><dt>카테고리</dt><dd>${esc(a.category)}</dd></div>
+      <div><dt>오프라인</dt><dd>${a.offline ? "지원" : "미지원"}</dd></div>
+      <div><dt>기기</dt><dd>${esc(a.devices)}</dd></div>
+    </dl>
+    <section class="sec"><div class="sec-h"><h2>미리 보기</h2></div>
+      <div class="shots-row">${a.screens.map(s => `<figure><img src="${s.src}" alt="${esc(s.cap)}" loading="lazy"><figcaption>${esc(s.cap)}</figcaption></figure>`).join("")}</div>
+    </section>
+    <section class="sec"><div class="sec-h"><h2>앱 소개</h2></div><div class="prose">${a.description.map(p => `<p>${esc(p)}</p>`).join("")}</div></section>
+    <section class="sec"><div class="sec-h"><h2>주요 기능</h2></div><ul class="feat">${a.features.map(x => `<li>${esc(x)}</li>`).join("")}</ul></section>
+    <section class="sec"><div class="sec-h"><h2>알아 두세요</h2></div><div class="note">${esc(a.notice)}</div></section>
+    <section class="sec"><div class="sec-h"><h2>정보</h2></div>
+      <table class="info"><tbody>
+        <tr><th>개발자</th><td>${esc(a.developer)}</td></tr>
+        <tr><th>업데이트</th><td>${esc(a.updated)}</td></tr>
+        <tr><th>개인정보</th><td>${esc(a.privacy)}</td></tr>
+        <tr><th>주소</th><td><a href="${a.url}" target="_blank" rel="noopener">${esc(a.url)}</a></td></tr>
+      </tbody></table>
+    </section>`;
+}
+
+/* ───── 개인정보처리방침 ───── */
+function privacy(){
+  view.innerHTML = `
+    <a class="back" href="#">← 스토어로</a>
+    <div class="prose">
+      <h1 style="font-size:26px;margin:0 0 6px">개인정보처리방침</h1>
+      <p class="meta">시행일 2026년 11월 9일</p>
+      <p>HOONSTORE와 HOONSTORE에 올라온 앱(이하 '앱')은 개인정보를 수집하지 않습니다.</p>
+      <p><b>수집하는 정보</b><br>없습니다. 회원가입, 로그인, 광고, 방문자 분석 도구를 쓰지 않습니다.</p>
+      <p><b>기기에 저장되는 정보</b><br>앱을 빠르게 열고 오프라인에서도 쓸 수 있도록 앱 파일을 브라우저 캐시에 저장합니다. 이 정보는 사용자의 기기 안에만 있으며, 브라우저 설정에서 사이트 데이터를 지우면 함께 삭제됩니다.</p>
+      <p><b>사용자가 입력하는 정보</b><br>앱 안에서 입력한 이름 같은 내용은 화면에 보여 주는 데만 쓰이고 서버로 보내지 않습니다.</p>
+      <p><b>외부 서비스</b><br>사이트는 GitHub Pages에서 제공되고, 글꼴은 Google Fonts에서 불러옵니다. 이 과정에서 각 서비스가 접속 기록(IP 주소 등)을 처리할 수 있으며, 이는 해당 서비스의 정책을 따릅니다.</p>
+      <p><b>문의</b><br><a href="https://github.com/junghoon1118" target="_blank" rel="noopener">github.com/junghoon1118</a></p>
+    </div>`;
+}
+
+/* ───── 설치 안내 ───── */
+const GUIDE = {
+  android: { label: "안드로이드", steps: url => [
+    `아래 <span class="kbd">앱 열기</span>를 눌러 <b>Chrome</b>에서 엽니다.`,
+    `오른쪽 위 <span class="kbd">⋮</span> 메뉴에서 <span class="kbd">앱 설치</span> 또는 <span class="kbd">홈 화면에 추가</span>를 누릅니다.`,
+    `홈 화면에 생긴 아이콘으로 실행합니다.`] },
+  ios: { label: "아이폰 · 아이패드", steps: url => [
+    `아래 <span class="kbd">앱 열기</span>를 눌러 <b>Safari</b>에서 엽니다.`,
+    `아래쪽 <span class="kbd">공유</span> 버튼(네모에서 화살표가 나오는 모양)을 누릅니다.`,
+    `<span class="kbd">홈 화면에 추가</span>를 고르고 오른쪽 위 <span class="kbd">추가</span>를 누릅니다.`] },
+  pc: { label: "PC", steps: url => [
+    `아래 <span class="kbd">앱 열기</span>를 눌러 <b>Chrome</b>이나 <b>Edge</b>에서 엽니다.`,
+    `주소창 오른쪽의 <span class="kbd">설치</span> 아이콘(모니터에 화살표)을 누릅니다.`,
+    `<span class="kbd">설치</span>를 누르면 바탕화면과 시작 메뉴에 앱이 생깁니다.`] }
+};
+let sheetPlat = myPlatform;
+function openSheet(id){
+  const a = APPS.find(x => x.id === id); if (!a) return;
+  const bg = $("#sheetBg");
+  const draw = () => {
+    const g = GUIDE[sheetPlat];
+    bg.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-top"><img class="ico" src="${a.icon}" alt=""><div><h2 id="sheetTitle">${esc(a.name)} 설치</h2><p>무료 · 계정 없이 설치</p></div><button class="x" id="sheetX" aria-label="닫기">×</button></div>
+      <div class="tabs" role="group" aria-label="기기 선택">${Object.keys(GUIDE).map(k => `<button data-plat="${k}" aria-pressed="${k === sheetPlat}">${GUIDE[k].label}${k === myPlatform ? " (지금 기기)" : ""}</button>`).join("")}</div>
+      <ol class="steps">${g.steps(a.url).map(s => `<li>${s}</li>`).join("")}</ol>
+      ${inApp ? `<div class="warnbox"><b>카카오톡 같은 앱 안에서 열었나요?</b><br>앱 안의 브라우저에서는 설치가 안 돼요. 오른쪽 위 메뉴에서 '다른 브라우저로 열기'를 누른 뒤 다시 시도하세요.</div>` : ""}
+      ${sheetPlat === "ios" && isIOS && /CriOS|FxiOS|EdgiOS/.test(ua) ? `<div class="warnbox">지금 Safari가 아닌 브라우저예요. 주소를 복사해서 Safari에 붙여 넣은 뒤 설치하세요.</div>` : ""}
+      <div class="acts"><a class="btn primary" href="${a.url}" target="_blank" rel="noopener">앱 열기</a><button class="btn" id="copyUrl">주소 복사</button></div>
+    </div>`;
+    $("#sheetX").onclick = closeSheet;
+    $("#copyUrl").onclick = () => copy(a.url);
+    bg.querySelectorAll("[data-plat]").forEach(b => b.onclick = () => { sheetPlat = b.dataset.plat; draw(); });
+  };
+  draw(); bg.hidden = false; document.body.style.overflow = "hidden";
+  $("#sheetX").focus();
+}
+function closeSheet(){ $("#sheetBg").hidden = true; document.body.style.overflow = ""; }
+$("#sheetBg").addEventListener("click", e => { if (e.target.id === "sheetBg") closeSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+/* ───── 화면 전환 ───── */
+function render(){
+  const h = location.hash.slice(1);
+  if (h.startsWith("app-")) { const a = APPS.find(x => x.id === h.slice(4)); if (a) { detail(a); document.title = a.name + " · HOONSTORE"; return; } }
+  if (h === "privacy") { privacy(); document.title = "개인정보처리방침 · HOONSTORE"; return; }
+  home(); document.title = "HOONSTORE";
+}
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+view.addEventListener("click", e => {
+  const ins = e.target.closest("[data-install]");
+  if (ins) { e.preventDefault(); openSheet(ins.dataset.install); return; }
+  const c = e.target.closest("[data-cat]");
+  if (c) { state.cat = c.dataset.cat; home(); }
+});
+$("#q").addEventListener("input", e => { state.q = e.target.value; if (location.hash && location.hash !== "#") location.hash = ""; else home(); });
+
+/* 스토어 자체 설치 버튼 (지원하는 브라우저에서만 보임) */
+let deferred = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; $("#installStore").hidden = false; });
+$("#installStore").onclick = async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch(e){} deferred = null; $("#installStore").hidden = true; };
+
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+render();
+})();
+</script>
+</body>
+</html>
