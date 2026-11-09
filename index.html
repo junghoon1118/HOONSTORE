@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>HOONSTORE</title>
 <meta name="description" content="junghoon1118이 만든 웹앱을 모아 둔 스토어. 설치비 없이 홈 화면에 추가해서 앱처럼 쓰세요.">
+<link rel="canonical" href="https://junghoon1118.github.io/HOONSTORE/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="HOONSTORE">
+<meta property="og:title" content="HOONSTORE">
+<meta property="og:description" content="junghoon1118이 만든 웹앱을 모아 둔 스토어. 설치비 없이 홈 화면에 추가해서 앱처럼 쓰세요.">
+<meta property="og:url" content="https://junghoon1118.github.io/HOONSTORE/">
+<meta property="og:image" content="https://junghoon1118.github.io/HOONSTORE/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#14161b">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -15,167 +25,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
-<style>
-/* 레이아웃: 위에 스토어 간판(로고+검색), 그 아래 '오늘의 앱' 진열대, 카테고리, 앱 목록. 상세 화면은 같은 틀에서 해시(#app-아이디)로 바꿔 보여 준다. */
-:root{
-  --bg:#f2f3f5; --surface:#ffffff; --surface-2:#e8eaee; --ink:#14161b; --ink-2:#474c57; --ink-3:#757b87; --line:#d8dbe1;
-  --accent:#2b4fd8; --accent-ink:#ffffff; --marker:#ffd43b; --ok:#1f7a4d; --warn:#9a5b00;
-  --f-display:"Black Han Sans","IBM Plex Sans KR",sans-serif;
-  --f-ui:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  --r:14px;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0e1014; --surface:#171a20; --surface-2:#21252d; --ink:#eef0f4; --ink-2:#b6bbc5; --ink-3:#8b919d; --line:#2b3039;
-  --accent:#7590ff; --accent-ink:#0e1014; --marker:#e8c12d; --ok:#5cc28f; --warn:#e3a64a; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0e1014; --surface:#171a20; --surface-2:#21252d; --ink:#eef0f4; --ink-2:#b6bbc5; --ink-3:#8b919d; --line:#2b3039;
-  --accent:#7590ff; --accent-ink:#0e1014; --marker:#e8c12d; --ok:#5cc28f; --warn:#e3a64a; color-scheme:dark}
-
-*,*::before,*::after{box-sizing:border-box}
-:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6}
-img{max-width:100%;display:block}
-[hidden]{display:none!important}
-a{color:inherit}
-button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-
-.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-
-/* 간판 */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.top .wrap{display:flex;align-items:center;gap:14px;padding-block:12px}
-.logo{display:flex;align-items:baseline;gap:2px;text-decoration:none;flex:none}
-.logo b{font-family:var(--f-display);font-weight:400;font-size:26px;letter-spacing:.01em;line-height:1;background:linear-gradient(transparent 62%,var(--marker) 62% 92%,transparent 92%);padding:0 2px}
-.logo span{font-weight:700;font-size:14px;letter-spacing:.22em;color:var(--ink-2);margin-left:4px}
-.search{flex:1;min-width:0;position:relative;max-width:420px;margin-left:auto}
-.search input{width:100%;font:inherit;font-size:14px;padding:9px 12px 9px 36px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
-.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ink-3)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}
-.btn:hover{background:var(--surface-2)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.primary:hover{filter:brightness(1.07)}
-.btn.small{padding:6px 14px;font-size:13px}
-
-main{padding-block:22px 48px}
-.sec{margin-top:34px}
-.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px}
-.sec-h h2{font-size:19px;margin:0;letter-spacing:-.01em}
-.sec-h small{color:var(--ink-3);font-size:13px}
-
-/* 오늘의 앱 */
-.feature{position:relative;overflow:hidden;border-radius:22px;background:var(--app,#2e4a3b);color:#f4f2ea;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);min-height:340px}
-.feature .txt{padding:30px 32px;display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:0}
-.eyebrow{font-size:12px;letter-spacing:.18em;font-weight:600;opacity:.8;margin:0}
-.feature h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.12;margin:0;text-wrap:balance}
-.feature p.tag{margin:0;font-size:16px;opacity:.92;max-width:34ch}
-.feature .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.feature .btn{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff}
-.feature .btn.primary{background:#f4f2ea;color:#1c2a22;border-color:#f4f2ea}
-.feature .shots{position:relative;min-width:0}
-.phone{position:absolute;width:200px;aspect-ratio:375/812;border-radius:26px;overflow:hidden;border:6px solid #11161a;box-shadow:0 20px 40px rgba(0,0,0,.35);background:#11161a}
-.phone img{width:100%;height:100%;object-fit:cover;object-position:top}
-.phone.p1{right:150px;top:40px;transform:rotate(-6deg)}
-.phone.p2{right:20px;top:18px;transform:rotate(4deg)}
-.chalk{position:absolute;left:32px;bottom:18px;font-size:12px;opacity:.65}
-
-/* 카테고리 */
-.cats{display:flex;gap:8px;flex-wrap:wrap}
-.cat{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:14px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
-.cat em{font-style:normal;color:var(--ink-3);font-size:12px;font-variant-numeric:tabular-nums}
-.cat[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.cat[aria-pressed="true"] em{color:inherit;opacity:.7}
-
-/* 앱 목록 */
-.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
-.row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;text-decoration:none}
-.row:hover{border-color:var(--ink-3)}
-.ico{width:64px;height:64px;border-radius:16px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
-.row h3{margin:0;font-size:16px;line-height:1.35}
-.row p{margin:2px 0 0;color:var(--ink-3);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.meta{color:var(--ink-3);font-size:12px}
-.empty{background:var(--surface);border:1px dashed var(--line);border-radius:var(--r);padding:26px;text-align:center;color:var(--ink-2)}
-.empty b{display:block;color:var(--ink);margin-bottom:4px}
-
-/* 설치 방식 안내 */
-.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;counter-reset:s}
-.how div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 18px}
-.how b{display:block;margin-bottom:4px}
-.how div::before{counter-increment:s;content:counter(s);display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--marker);color:#14161b;font-weight:700;font-size:13px;margin-bottom:8px}
-.how p{margin:0;color:var(--ink-2);font-size:14px}
-
-/* 상세 */
-.back{display:inline-flex;align-items:center;gap:4px;color:var(--ink-2);text-decoration:none;font-size:14px;margin-bottom:14px}
-.head{display:grid;grid-template-columns:112px minmax(0,1fr);gap:20px;align-items:center}
-.head .ico{width:112px;height:112px;border-radius:26px}
-.head h1{margin:0;font-size:clamp(24px,4vw,32px);line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
-.head .dev{color:var(--accent);font-size:14px;font-weight:600;margin:2px 0 0}
-.head .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:22px;border-block:1px solid var(--line)}
-.facts div{padding:12px 8px;text-align:center;border-right:1px solid var(--line)}
-.facts div:last-child{border-right:0}
-.facts dt{font-size:12px;color:var(--ink-3)}
-.facts dd{margin:2px 0 0;font-weight:700;font-size:14px}
-.shots-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}
-.shots-row figure{margin:0;flex:none;width:200px;scroll-snap-align:start}
-.shots-row img{width:200px;aspect-ratio:375/812;object-fit:cover;object-position:top;border-radius:16px;border:1px solid var(--line)}
-.shots-row figcaption{font-size:12px;color:var(--ink-3);margin-top:6px}
-.prose{max-width:68ch}
-.prose p{margin:0 0 10px}
-.feat{list-style:none;padding:0;margin:0;display:grid;gap:8px;max-width:68ch}
-.feat li{display:grid;grid-template-columns:20px 1fr;gap:8px}
-.feat li::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--marker);margin-top:9px;margin-left:4px}
-.note{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;font-size:14px;color:var(--ink-2);max-width:68ch}
-.info{border-collapse:collapse;width:100%;max-width:640px;font-size:14px}
-.info th,.info td{text-align:left;padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
-.info th{width:120px;color:var(--ink-3);font-weight:500}
-.info td{word-break:break-all}
-
-/* 설치 안내 시트 */
-.sheet-bg{position:fixed;inset:0;z-index:40;background:rgba(10,12,16,.5);display:grid;place-items:end center}
-.sheet{width:min(520px,100%);max-height:90vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:20px 20px 0 0;padding:20px 20px calc(22px + env(safe-area-inset-bottom,0px))}
-@media (min-width:700px){.sheet-bg{place-items:center}.sheet{border-radius:20px}}
-.sheet-top{display:flex;gap:12px;align-items:center}
-.sheet-top .ico{width:48px;height:48px;border-radius:12px}
-.sheet-top h2{margin:0;font-size:17px}
-.sheet-top p{margin:0;color:var(--ink-3);font-size:13px}
-.x{margin-left:auto;border:0;background:var(--surface-2);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;line-height:1}
-.tabs{display:flex;gap:6px;margin:16px 0 12px;flex-wrap:wrap}
-.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
-.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.steps{margin:0;padding-left:22px;display:grid;gap:8px}
-.steps li{padding-left:2px}
-.kbd{display:inline-block;border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:0 6px;font-size:13px;font-weight:600}
-.warnbox{margin-top:12px;background:color-mix(in srgb,var(--marker) 22%,var(--surface));border-radius:10px;padding:10px 12px;font-size:13px}
-.sheet .acts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
-.sheet .acts .btn{flex:1}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px}
-
-footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px}
-footer .wrap{padding-block:22px 30px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between}
-footer nav{display:flex;gap:14px;flex-wrap:wrap}
-
-@media (max-width:760px){
-  .feature{grid-template-columns:1fr;min-height:0}
-  .feature .txt{padding:24px 22px 8px}
-  .feature .shots{height:250px}
-  .phone{width:150px}
-  .phone.p1{right:auto;left:22px;top:26px}
-  .phone.p2{right:auto;left:150px;top:14px}
-  .chalk{display:none}
-  .how{grid-template-columns:1fr}
-  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .facts div:nth-child(2){border-right:0}
-  .facts div:nth-child(-n+2){border-bottom:1px solid var(--line)}
-  .head{grid-template-columns:84px minmax(0,1fr);gap:14px}
-  .head .ico{width:84px;height:84px;border-radius:20px}
-  .list{grid-template-columns:1fr}
-  .logo span{display:none}
-}
-@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
-</style>
+<link rel="stylesheet" href="assets/store.css">
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -184,11 +34,21 @@ footer nav{display:flex;gap:14px;flex-wrap:wrap}
   <button class="btn small" id="installStore" hidden>스토어 설치</button>
 </div></header>
 
-<main class="wrap" id="view"></main>
+<main class="wrap" id="view">
+<!--STATIC-->
+<section class="prose" style="padding-block:10px">
+<h1 style="font-size:24px;margin:0 0 6px">HOONSTORE</h1>
+<p>junghoon1118이 만든 웹앱을 모아 둔 스토어입니다. 설치비나 계정 없이, 브라우저에서 홈 화면에 추가해서 앱처럼 쓸 수 있습니다.</p>
+<ul>
+<li><a href="apps/sqld/"><b>SQLD 모의 시험장</b></a> · 교육 · 시험장 분위기까지 연습하는 SQL 자격시험 모의고사</li>
+</ul>
+</section>
+<!--/STATIC-->
+</main>
 
 <footer><div class="wrap">
   <span>HOONSTORE · junghoon1118이 만든 웹앱을 모아 둔 곳</span>
-  <nav><a href="#privacy">개인정보처리방침</a><a href="https://github.com/junghoon1118" target="_blank" rel="noopener">GitHub</a></nav>
+  <nav><a href="privacy/">개인정보처리방침</a><a href="https://github.com/junghoon1118" target="_blank" rel="noopener">GitHub</a></nav>
 </div></footer>
 
 <div class="sheet-bg" id="sheetBg" hidden></div>
@@ -198,40 +58,7 @@ footer nav{display:flex;gap:14px;flex-wrap:wrap}
 (function(){
 "use strict";
 /* ───── 앱 목록: 새 앱을 올릴 때 여기에 하나씩 추가한다 ───── */
-const APPS = [
-  {
-    id: "sqld",
-    name: "SQLD 모의 시험장",
-    tagline: "시험장 분위기까지 연습하는 SQL 자격시험 모의고사",
-    category: "교육",
-    url: "https://junghoon1118.github.io/SQLD/",
-    icon: "assets/apps/sqld/icon.png",
-    color: "#2e4a3b",
-    developer: "junghoon1118",
-    updated: "2026.11.09",
-    offline: true,
-    devices: "폰 · 태블릿 · PC",
-    screens: [
-      { src: "assets/apps/sqld/screen-1.jpg", cap: "수험표 확인과 시험 설정" },
-      { src: "assets/apps/sqld/screen-2.jpg", cap: "무작위 좌석에서 바라본 교실과 문제지" },
-      { src: "assets/apps/sqld/screen-3.jpg", cap: "컴퓨터용 사인펜으로 칠하는 OMR 답안지" }
-    ],
-    description: [
-      "시험장에 들어가면 머리가 하얘지는 사람을 위한 모의고사입니다. 학교 교실을 그대로 옮겨 와서, 무작위로 배정된 자리에 앉아 실제 시험처럼 90분을 보내게 합니다.",
-      "감독관이 교실을 돌고, 교내 방송이 시작과 종료를 알리고, 주변에서는 기침 소리와 종이 넘기는 소리가 들립니다. 답은 문제지가 아니라 OMR 답안지에 사인펜으로 칠해야 하고, 고칠 때는 수정테이프를 써야 합니다."
-    ],
-    features: [
-      "1과목 10문항, 2과목 40문항, 총 100점. 과목별 과락까지 판정",
-      "2과목은 SQL 실행 결과와 오류를 찾는 코드 중심 문제",
-      "감독관 순찰, 본인 확인, 교내 방송, 방해 소음 (강도 선택)",
-      "문제지와 OMR 답안지 분리, 중복 표기는 오답, 답안지 교체 요청",
-      "채점 후 문항별 해설과 '문제지 답과 OMR 답이 다른 문항' 확인",
-      "실전 90분 · 단축 30분 · 체험 10분 모드"
-    ],
-    notice: "공식 시험 기관과 관련 없는 비공식 연습 앱입니다. 문제는 모두 자체 제작했습니다. 실제 시험 규정은 데이터자격검정 공식 사이트에서 확인하세요.",
-    privacy: "개인정보를 수집하지 않습니다. 입력한 이름은 시험 화면에만 쓰이고 어디에도 저장하거나 보내지 않습니다."
-  }
-];
+let APPS = [];
 const CATS = ["전체", "교육", "생산성", "도구", "게임"];
 
 /* ───── 공통 ───── */
@@ -411,7 +238,7 @@ window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferr
 $("#installStore").onclick = async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch(e){} deferred = null; $("#installStore").hidden = true; };
 
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
-render();
+fetch("apps.json").then(r => r.json()).then(d => { APPS = d; render(); }).catch(() => { /* keep the static list from build.ps1 */ });
 })();
 </script>
 </body>
